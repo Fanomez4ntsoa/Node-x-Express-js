@@ -2,9 +2,9 @@ const { default: mongoose } = require("mongoose")
 
 mongoose.set('strictQuery', true);
 
-const dbConnect = async() => {
+const dbConnect = () => {
   try {
-    const connect = mongoose.connect(process.env.MONGODB_URL);
+    const conn = mongoose.connect(process.env.MONGODB_URL);
     console.log("Database Connected Successfully");
   } catch (error) {
     // throw new Error(error);

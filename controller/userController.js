@@ -57,14 +57,17 @@ const deleteUser = asyncHandler( async(req, res) => {
   const { id } = req.params;
   try {
     const deleteUser = await User.findByIdAndDelete(id);
-    res.json({deleteUser});
+    res.json({
+      status: deleteUser,
+      message: "This user has been deleted"
+    });
   } catch (error) {
     throw new Error(error);
   }
 });
 // Update information of User
 const updateUser = asyncHandler( async(req, res) => {
-  const { id } = req.params;
+  const { id } = req.user;
   try {
     const updateUser = await User.findByIdAndUpdate(
       id, 
@@ -84,4 +87,29 @@ const updateUser = asyncHandler( async(req, res) => {
   }
 });
 
-module.exports = { registerUserController, loginUserController, getAllUser, getUser, deleteUser, updateUser };
+const blockUser = asyncHandler( async(req, res) => {
+  const { id } = req.params;
+  try {
+    const block = await User.findByIdAndUpdate(id, { isBlocked: true}, {new: true});
+    res.json({
+      status: block?.isBlocked,
+      message: 'User blocked'
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+}); 
+const unblockUser = asyncHandler( async(req, res) => {
+  const { id } = req.params;
+  try {
+    const unblock = await User.findByIdAndUpdate(id, { isBlocked: false}, {new: true});
+    res.json({
+      status: unblock?.isBlocked,
+      message: 'User unblocked'
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+}); 
+
+module.exports = { registerUserController, loginUserController, getAllUser, getUser, deleteUser, updateUser, blockUser, unblockUser };

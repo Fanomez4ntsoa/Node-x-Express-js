@@ -41,8 +41,6 @@ const getAllProduct = asyncHandler ( async (req, res) => {
         throw new Error('This Page does not exits');
       }
     };
-    console.log(page, limit, skip);
-
     const product = await query;
     res.json(product);
   } catch (error) {

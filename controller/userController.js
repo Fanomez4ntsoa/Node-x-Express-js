@@ -5,7 +5,7 @@ const validateMongodbId = require('../utils/validateMongodbid');
 const { generateRefreshToken } = require('../config/refreshToken');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('./emailController');
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 // For Authentification
 const registerUserController = asyncHandler ( async (req, res) => {
@@ -199,7 +199,7 @@ const forgotPasswordToken = asyncHandler( async (req, res) => {
   try {
     const token = await user.createPasswordResetToken();
     await user.save();
-    const resetURL = 'Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href="http://localhost:5000/api/user/reset-password/${token}">Click Here</a>'
+    const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:5000/api/user/reset-password/${token}'>Click Here</a>`
     const data = {
       to: email,
       text: 'Hey',

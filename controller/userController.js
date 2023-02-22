@@ -71,7 +71,6 @@ const logout = asyncHandler ( async(req, res) => {
   return res.sendStatus(204);
 });
 
-
 //handle refresh token
 const handleRefreshToken = asyncHandler ( async(req, res) => {
   const cookie = req.cookies;
@@ -90,11 +89,8 @@ const handleRefreshToken = asyncHandler ( async(req, res) => {
   });
 });
 
-
-
-// CRUD for user
 // Get All Users
-const getAllUser = asyncHandler( async (req, res) => {
+const getAllUsers = asyncHandler( async (req, res) => {
   try {
     const getUsers = await User.find()
     res.json(getUsers);
@@ -102,27 +98,15 @@ const getAllUser = asyncHandler( async (req, res) => {
     throw new Error(error)
   }
 })
-// Show information User
+
+// CRUD for user
+// Read information User
 const getUser = asyncHandler( async (req, res) => {
   const { id } = req.params;
   validateMongodbId(id);
   try {
     const getUser = await User.findById(id);
     res.json(getUser);    
-  } catch (error) {
-    throw new Error(error);
-  }
-});
-// Delete User
-const deleteUser = asyncHandler( async(req, res) => {
-  const { id } = req.params;
-  validateMongodbId(id);
-  try {
-    const deleteUser = await User.findByIdAndDelete(id);
-    res.json({
-      status: deleteUser,
-      message: "This user has been deleted"
-    });
   } catch (error) {
     throw new Error(error);
   }
@@ -145,6 +129,20 @@ const updateUser = asyncHandler( async(req, res) => {
       }
     );
     res.json(updateUser);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+// Delete User
+const deleteUser = asyncHandler( async(req, res) => {
+  const { id } = req.params;
+  validateMongodbId(id);
+  try {
+    const deleteUser = await User.findByIdAndDelete(id);
+    res.json({
+      status: deleteUser,
+      message: "This user has been deleted"
+    });
   } catch (error) {
     throw new Error(error);
   }
@@ -230,4 +228,4 @@ const resetPassword = asyncHandler ( async (req,res) => {
   res.json(user);
 });
 
-module.exports = { registerUserController, loginUserController, getAllUser, getUser, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };
+module.exports = { registerUserController, loginUserController, getAllUsers, getUser, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };

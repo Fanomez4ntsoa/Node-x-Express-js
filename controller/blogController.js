@@ -30,7 +30,7 @@ const getPost = asyncHandler ( async (req,res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const getPost = await Blog.findById(id);
+    const getPost = await Blog.findById(id).populate('likes').populate('dislikes');
     await Blog.findByIdAndUpdate(id, {$inc: { numViews : 1 } }, { new: true });
     res.json(getPost);
   } catch (error) {

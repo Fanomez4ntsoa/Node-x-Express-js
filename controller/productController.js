@@ -1,4 +1,5 @@
 const Product = require('../models/productModel');
+const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
 const validateMongodbId = require('../utils/validateMongodbid');
@@ -103,4 +104,49 @@ const deleteProduct = asyncHandler ( async (req, res) => {
   }
 })
 
-module.exports = { createProduct, getAllProducts, getProduct, updateProduct, deleteProduct }
+const addToWishList = asyncHandler ( async (req,res) => {
+  const { id } = req.user;
+  const { prodId } = req.body;
+  try {
+    const user = await User.findById(id);
+    const alreadyAdded = user.wishlist.find((id) => id.toString() === prodId);
+    if(alreadyAdded) {
+      let user = await User.findByIdAndUpdate(id, {
+        $pull: {wishlist: prodId},
+      }, { new: true });
+      res.json(user);
+    } else {
+      let user = await User.findByIdAndUpdate(id, {
+        $push: {wishlist: prodId},
+      }, { new: true });
+      res.json(user);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+const rating = asyncHandler ( async (req,res) => {
+  const { id } = req.user;
+  const { star, prodId } = req.body;
+  try {
+    const product = await Product.findById(prodId);
+    let alreadyRated = product.ratings.find((userId) => userId.postedby.toString() === id.toString());
+    if(alreadyRated) {
+      const updateRating = await Product.updateOne({ ratings: { $elemMatch: alreadyRated }}, { $set: {"ratings.$.star": star }}, { new: true} );
+    } else {
+      const rateProduct = await Product.findByIdAndUpdate(prodId, { $push: { ratings: { star: star, postedby: id } } }, { new: true} );
+    }
+  const getAllRatings = await Product.findById(prodId);
+  let totalRating = getAllRatings.ratings.length;
+  let ratingsum = getAllRatings.ratings.map((item) => item.star).reduce((prev, curr) => prev + curr, 0);
+  let actualRating = Math.round(ratingsum / totalRating);
+  const finalRating = await Product.findByIdAndUpdate(prodId, { totalrating: actualRating }, { new: true} )
+  res.json(finalRating);
+  } catch (error) {
+    throw new Error(error);
+  }
+
+});
+
+module.exports = { createProduct, getAllProducts, getProduct, updateProduct, deleteProduct, addToWishList, rating }

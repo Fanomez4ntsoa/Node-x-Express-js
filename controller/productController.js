@@ -128,14 +128,14 @@ const addToWishList = asyncHandler ( async (req,res) => {
 
 const rating = asyncHandler ( async (req,res) => {
   const { id } = req.user;
-  const { star, prodId } = req.body;
+  const { star, prodId, comment } = req.body;
   try {
     const product = await Product.findById(prodId);
     let alreadyRated = product.ratings.find((userId) => userId.postedby.toString() === id.toString());
     if(alreadyRated) {
-      const updateRating = await Product.updateOne({ ratings: { $elemMatch: alreadyRated }}, { $set: {"ratings.$.star": star }}, { new: true} );
+      const updateRating = await Product.updateOne({ ratings: { $elemMatch: alreadyRated }}, { $set: { "ratings.$.star": star, "ratings.$.comment": comment }}, { new: true} );
     } else {
-      const rateProduct = await Product.findByIdAndUpdate(prodId, { $push: { ratings: { star: star, postedby: id } } }, { new: true} );
+      const rateProduct = await Product.findByIdAndUpdate(prodId, { $push: { ratings: { star: star, comment: comment, postedby: id } } }, { new: true} );
     }
   const getAllRatings = await Product.findById(prodId);
   let totalRating = getAllRatings.ratings.length;

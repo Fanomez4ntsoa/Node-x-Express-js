@@ -1,4 +1,4 @@
-const cloudinary = request('cloudinary');
+const cloudinary = request('cloudinary').v2;
 
 cloudinary.config({
   cloud_name: process.env.NAME_CLOUDINARY,

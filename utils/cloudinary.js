@@ -1,16 +1,16 @@
-const cloudinary = request('cloudinary').v2;
+const cloudinary = require('cloudinary');
 
 cloudinary.config({
-  cloud_name: process.env.NAME_CLOUDINARY,
-  api_key: process.env.API_KEY_CLOUDINARY,
-  api_secret: process.env.API_SECRET_CLOUDINARY
+  cloud_name: process.env.NAME_CLOUD,
+  api_key: process.env.API_KEY_CLOUD,
+  api_secret: process.env.API_SECRET_CLOUD
 });
 
-const cloudinaryUpload = async (fileToUploads) => {
+const cloudinaryUploadImg = async (fileToUploads) => {
   return new Promise((resolve) => {
     cloudinary.uploader.upload(fileToUploads, (result) => {
       resolve({
-        ulr: result.secure_url
+        url: result.secure_url
       }, {
         resource_type: 'auto',
       });
@@ -18,4 +18,4 @@ const cloudinaryUpload = async (fileToUploads) => {
   })
 }
 
-module.exports = cloudinaryUpload;
+module.exports = cloudinaryUploadImg;

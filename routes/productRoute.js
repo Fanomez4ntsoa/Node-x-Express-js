@@ -10,7 +10,7 @@ router.put('/add-wishlist', authMiddleware, addToWishList);
 router.put('/rating', authMiddleware, rating);
 router.post('/new-product', authMiddleware, isAdmin, createProduct);
 router.put('/edit-product/:id', authMiddleware, isAdmin, updateProduct);
-router.put('/upload-image/:id', authMiddleware, isAdmin, updateImages, uploadPhoto.array('images', 10), productImgResize);
+router.put('/upload-image/:id', authMiddleware, isAdmin, uploadPhoto.array('images', 10), productImgResize, updateImages);
 router.delete('/:id', authMiddleware, isAdmin, deleteProduct);
 
 module.exports = router;

@@ -19,7 +19,7 @@ const registerUserController = asyncHandler ( async (req, res) => {
     }
 });
 
-const loginUserController = asyncHandler( async (req, res) => {
+const loginUserController = asyncHandler ( async (req, res) => {
   const { email, password } = req.body;
   // Check if user exists 
   const findUser = await User.findOne({ email });
@@ -41,6 +41,38 @@ const loginUserController = asyncHandler( async (req, res) => {
       email    : findUser?.email,
       mobile   : findUser?.mobile,
       token    : generateToken(findUser?._id),
+    });
+  } else {
+    throw new Error('Invalid Credentials');
+  }
+});
+
+// login for admin
+const loginAdminController = asyncHandler( async (req, res) => {
+  const { email, password } = req.body;
+  // Check if user exists 
+  const findAdminUser = await User.findOne({ email });
+  if(findAdminUser.role !== 'admin') {
+    throw new Error('Not Authorised');
+  }
+  if(findAdminUser && await findAdminUser.isPasswordMatched(password)) {
+    const refreshToken = await generateRefreshToken(findAdminUser?.id);
+    const updateuser = await User.findByIdAndUpdate(
+      findAdminUser.is,
+      { refreshToken: refreshToken },
+      { new : true }
+    );
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 72 * 60 * 60 * 1000,
+    });
+    res.json({
+      _id      : findAdminUser?._id,
+      firstname: findAdminUser?.firstname,
+      lastname : findAdminUser?.lastname,
+      email    : findAdminUser?.email,
+      mobile   : findAdminUser?.mobile,
+      token    : generateToken(findAdminUser?._id),
     });
   } else {
     throw new Error('Invalid Credentials');
@@ -228,4 +260,14 @@ const resetPassword = asyncHandler ( async (req,res) => {
   res.json(user);
 });
 
-module.exports = { registerUserController, loginUserController, getAllUsers, getUser, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };
+const getWishList = asyncHandler ( async (req,res) => {
+  const { id } = req.user;
+  try {
+    const findUser = await User.findById(id).populate('wishlist');
+    res.json(findUser);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+module.exports = { registerUserController, loginUserController, loginAdminController, getAllUsers, getUser, getWishList, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };

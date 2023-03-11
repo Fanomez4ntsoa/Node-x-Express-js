@@ -14,6 +14,7 @@ var blogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  images:  [],
   numViews: {
     type: Number,
     default: 0,
@@ -38,7 +39,6 @@ var blogSchema = new mongoose.Schema({
     type: String,
     default: 'Admin',
   },
-  images:  [],
 }, {
   toJSON: {
     virtuals: true,

@@ -1,4 +1,6 @@
 const User = require('../models/userModel');
+const Product = require('../models/productModel');
+const Cart = require('../models/cartModel');
 const asyncHandler = require('express-async-handler');
 const { generateToken } = require('../config/jwtToken');
 const validateMongodbId = require('../utils/validateMongodbid');
@@ -129,7 +131,28 @@ const getAllUsers = asyncHandler( async (req, res) => {
   } catch (error) {
     throw new Error(error)
   }
+});
+
+// Save address
+const saveAddress = asyncHandler( async (req, res, next) => {
+  const { id } = req.user;
+  validateMongodbId(id);
+  try {
+    const updateUser = await User.findByIdAndUpdate(
+      id, 
+      {
+        address: req?.body?.address,
+      }, 
+      {
+        new: true,
+      }
+    );
+    res.json(updateUser);
+  } catch (error) {
+    throw new Error(error);
+  } 
 })
+
 
 // CRUD for user
 // Read information User
@@ -261,6 +284,7 @@ const resetPassword = asyncHandler ( async (req,res) => {
 });
 
 const getWishList = asyncHandler ( async (req,res) => {
+  console.log(req.user);
   const { id } = req.user;
   try {
     const findUser = await User.findById(id).populate('wishlist');
@@ -270,4 +294,38 @@ const getWishList = asyncHandler ( async (req,res) => {
   }
 });
 
-module.exports = { registerUserController, loginUserController, loginAdminController, getAllUsers, getUser, getWishList, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword };
+const userCart = asyncHandler ( async (req, res) => {
+  const { cart } = req.body;
+  const { id } = req.user;
+  validateMongodbId(id);
+  try {
+    let products = [];
+    const user = await User.findById(id);
+    // check if user already have product in cart
+    const cartProduct = await Cart.findOne({ orderby: user.id });
+    if(cartProduct) {
+      cartProduct.remove();
+    }
+    for (let i = 0; i < cart.length; i++) {
+      let object = {};
+      object.product = cart[i].id;
+      object.count = cart[i].count;
+      object.color = cart[i].color;
+      let getPrice = await Product.findById(cart[i].id).select('price').exec();
+      object.price = getPrice.price;
+      products.push(object);
+    }
+    let cartTotal = 0;
+    for (let i = 0; i < products.length; i++) {
+      cartTotal = cartTotal + products[i].price * products[i].count;
+    }
+    let newCart = await new Cart({
+      products, cartTotal, orderby: user?.id,
+    }).save();
+    res.json(newCart);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+module.exports = { registerUserController, loginUserController, loginAdminController, getAllUsers, getUser, getWishList, deleteUser, updateUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgotPasswordToken, resetPassword, saveAddress, userCart };
